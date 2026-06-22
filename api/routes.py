@@ -35,11 +35,8 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://gmail-ai-frontend-zeta.vercel.app",
-        "http://localhost:5173",
-    ],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -51,8 +48,20 @@ SCOPES = [
 ]
 
 
+# def get_gmail_service():
+#     creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+#     return build("gmail", "v1", credentials=creds)
+
+
 def get_gmail_service():
-    creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+    token_json = os.getenv("TOKEN_JSON")
+    if token_json:
+        # Production — from environment variable
+        token_data = json.loads(token_json)
+        creds = Credentials.from_authorized_user_info(token_data, SCOPES)
+    else:
+        # Local — from file
+        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
     return build("gmail", "v1", credentials=creds)
 
 
